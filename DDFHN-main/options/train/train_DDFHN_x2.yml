@@ -1,0 +1,108 @@
+name: DDFHN_x2
+model_type: SRModel
+scale: 2
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 10
+
+# dataset and data loader settings
+datasets:
+  train:
+    name: CVC-09-1K
+    type: PairedImageDataset
+    dataroot_gt: /media/smile/新加卷/liu/Infrared_SR/datasets/traindata/CVC-09-1K/train/train_hr
+    dataroot_lq: /media/smile/新加卷/liu/Infrared_SR/datasets/traindata/CVC-09-1K/train/train_lr/x2
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+    gt_size: 128
+    use_hflip: true
+    use_rot: true
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 8
+    batch_size_per_gpu: 16
+    dataset_enlarge_ratio: 10
+    prefetch_mode: ~
+
+  val:
+    name: CVC-09-1K
+    type: PairedImageDataset
+    dataroot_gt: /media/smile/新加卷/liu/Infrared_SR/datasets/traindata/CVC-09-1K/valid/valid_hr
+    dataroot_lq: /media/smile/新加卷/liu/Infrared_SR/datasets/traindata/CVC-09-1K/valid/valid_lr/x2
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+# DDFHN
+network_g:
+  type: DDFHN
+  dim: 36
+  n_blocks: 8
+  upscaling_factor: 2
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: false
+  resume_state: ~
+
+# training settings
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: Adam
+    lr: !!float 5e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones:  [ 25000, 50000, 75000 ]
+    gamma: 0.5
+
+  total_iter: 100000
+  warmup_iter: -1  # no warm up
+
+  # losses
+  pixel_opt:
+    type: L1Loss
+    loss_weight: 1.0
+    reduction: mean
+
+  fft_opt:
+    type: FFTLoss
+    loss_weight: 0.1
+    reduction: mean
+
+# validation settings
+val:
+  val_freq: !!float 5000
+  save_img: false
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 2
+      test_y_channel: False
+      better: higher  # the higher, the better. Default: higher
+    ssim: # metric name, can be arbitrary
+      type: calculate_ssim
+      crop_border: 2
+      test_y_channel: False
+      better: higher  # the higher, the better. Default: higher
+
+# logging settings
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 5000
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

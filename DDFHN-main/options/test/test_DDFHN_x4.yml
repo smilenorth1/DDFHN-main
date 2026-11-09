@@ -1,0 +1,69 @@
+name: DDFHN_x4
+model_type: SRModel
+scale: 4
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 0
+
+datasets:
+  test_1:
+    name: resultsA
+    type: PairedImageDataset
+    dataroot_gt: datasets/test/resultsA/HR
+    dataroot_lq: datasets/test/resultsA/LR/x4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_2:
+    name: resultsC
+    type: PairedImageDataset
+    dataroot_gt: datasets/test/resultsC/HR
+    dataroot_lq: datasets/test/resultsC/LR/x4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_3:
+    name: M3FD
+    type: PairedImageDataset
+    dataroot_gt: /media/smile/新加卷/liu/Infrared_SR/datasets/testdata/M3FD/Infrared/ir_hr
+    dataroot_lq: /media/smile/新加卷/liu/Infrared_SR/datasets/testdata/M3FD/Infrared/ir_lr/x4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_4:
+    name: IR700
+    type: PairedImageDataset
+    dataroot_gt: /media/smile/新加卷/liu/Infrared_SR/datasets/testdata/IR700/test_hr
+    dataroot_lq: /media/smile/新加卷/liu/Infrared_SR/datasets/testdata/IR700/test_lr/x4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+# DDFHN
+network_g:
+  type: DDFHN
+  dim: 36
+  n_blocks: 8
+  upscaling_factor: 4
+
+# path
+path:
+  pretrain_network_g: experiments/pretraine_models/DDFHN_x4.pth
+  strict_load_g: true
+
+# validation settings
+val:
+  save_img: true
+  suffix: ~  # add suffix to saved images, if None, use exp name
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: False
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: False
