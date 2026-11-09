@@ -9,7 +9,7 @@
 ### Requirements
 > - Python 3.8, PyTorch >= 2.3.0
 > - BasicSR 1.4.2
-> - > - GPU: NVIDIA RTX 3090
+> - GPU: NVIDIA RTX 3090
 > - Platforms: Ubuntu 18.04, cuda-11.8 or higher
 
 ### Installation
